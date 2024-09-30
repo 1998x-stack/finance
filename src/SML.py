@@ -1,9 +1,19 @@
+import sys,os
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '..'))
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 import statsmodels.api as sm
 from typing import List, Dict
+
+from util.log_utils import logger
+from config.config import FONT_PATH, BASIC_IMAGE_DIR
+
+font_manager.fontManager.addfont(FONT_PATH)
+plt.rcParams['font.family'] = 'SimHei'
 
 class SecurityMarketLine:
     """证券市场线类，用于计算并绘制 SML。
@@ -107,23 +117,28 @@ class SecurityMarketLine:
         plt.title('证券市场线 (SML)')
         plt.legend()
         plt.grid(True)
-        plt.show()
+        plt.savefig(os.path.join(BASIC_IMAGE_DIR,'sml.png'))
+        plt.close()
 
     def print_results(self):
         """打印每只股票的 β 系数和预期回报率。"""
-        print("股票的 β 系数和预期年化回报率：")
+        logger.log_info("股票的 β 系数和预期年化回报率：")
         for ticker in self.stock_tickers:
             beta = self.betas[ticker]
             expected_return = self.expected_returns[ticker]
-            print(f"{ticker}: β = {beta:.4f}, 预期年化回报率 = {expected_return:.2%}")
+            logger.log_info(f"{ticker}: β = {beta:.4f}, 预期年化回报率 = {expected_return:.2%}")
 
     def run(self):
         """执行完整的 SML 分析流程。"""
         self.fetch_data()
+        logger.log_info("数据已准备好。")
         self.calculate_betas()
+        logger.log_info("β 系数已计算。")
         self.calculate_expected_returns()
+        logger.log_info("预期年化回报率已计算。")
         self.print_results()
         self.plot_sml()
+        logger.log_info("SML 分析已完成。")
 
 if __name__ == "__main__":
     # 设置参数
